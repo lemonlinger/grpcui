@@ -30,7 +30,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	reflectpb "google.golang.org/grpc/reflection/grpc_reflection_v1alpha"
 
-	"github.com/fullstorydev/grpcui/standalone"
+	"github.com/lemonlinger/grpcui/standalone"
 )
 
 var version = "dev build <no version set>"
