@@ -1,8 +1,7 @@
 package standalone
 
-// all binaries of files under /resources are combined into a single file 'bindata.go'.
-
-//go:generate ./go-bindata-all.sh
+//go:generate go get github.com/kevinburke/go-bindata
+//go:generate go-bindata -pkg=standalone favicon.png grpc-logo.svg index-template.html jquery-3.3.1.min.js jquery-ui-1.12.1.min.css jquery-ui-1.12.1.min.js
 
 // GetResources is an exported accessor for resource file contents.
 func GetResources() map[string]func() []byte {
