@@ -6,7 +6,7 @@ dev_build_version=$(shell git describe --tags --always --dirty)
 # they are just too noisy to be a requirement for a CI -- we don't even *want*
 # to fix some of the things they consider to be violations.
 .PHONY: ci
-ci: deps checkgofmt vet staticcheck ineffassign predeclared test
+ci: deps vet staticcheck ineffassign predeclared test
 
 .PHONY: deps
 deps:
@@ -30,13 +30,6 @@ docker:
 	@echo $(dev_build_version) > VERSION
 	docker build -t fullstorydev/grpcui:$(dev_build_version) .
 	@rm VERSION
-
-.PHONY: checkgofmt
-checkgofmt:
-	gofmt -s -l .
-	@if [ -n "$$(gofmt -s -l .)" ]; then \
-		exit 1; \
-	fi
 
 .PHONY: vet
 vet:
