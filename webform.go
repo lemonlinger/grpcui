@@ -106,4 +106,5 @@ func WebFormScript() []byte {
 // styling.
 func WebFormSampleCSS() []byte {
 	return webform.WebFormSampleCSS()
+
 }
