@@ -9,8 +9,10 @@ func GetResources() map[string]func() []byte {
 	m := map[string]func() []byte{}
 	names := AssetNames()
 	for _, name := range names {
-		m["/"+name] = func() []byte {
-			return MustAsset(name)
+		k := "/" + name
+		v := MustAsset(name)
+		m[k] = func() []byte {
+			return v
 		}
 	}
 	return m
