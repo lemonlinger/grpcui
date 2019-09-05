@@ -44,19 +44,21 @@ var webFormTemplate = template.Must(template.New("grpc web form").Parse(string(w
 //
 // The returned HTML form requires that the contents of WebFormScript() have
 // already been loaded as a script in the page.
-func WebFormContents(invokeURI, metadataURI string, descs []*desc.MethodDescriptor) []byte {
+func WebFormContents(invokeURI, metadataURI string, reqmeta map[string]string, descs []*desc.MethodDescriptor) []byte {
 	params := struct {
-		InvokeURI   string
-		MetadataURI string
-		Services    []string
-		Methods     map[string][]string
-		Debug       bool
+		InvokeURI       string
+		MetadataURI     string
+		Services        []string
+		Methods         map[string][]string
+		Debug           bool
+		RequestMetadata map[string]string
 	}{
 		InvokeURI:   invokeURI,
 		MetadataURI: metadataURI,
 		Methods:     map[string][]string{},
 		// TODO(jh): parameter for enabling this instead of env var?
-		Debug: os.Getenv("GRPC_WEBFORM_DEBUG") != "",
+		Debug:           os.Getenv("GRPC_WEBFORM_DEBUG") != "",
+		RequestMetadata: reqmeta,
 	}
 
 	// build list of distinct service and method names and sort them

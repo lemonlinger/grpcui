@@ -2323,5 +2323,5 @@ window.initGRPCForm = function(services, invokeURI, metadataURI, debug) {
     formServiceSelected();
 
     // add a single blank entry to request metadata table
-    addMetadataRow();
+    // addMetadataRow();
 };

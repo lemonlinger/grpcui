@@ -24,6 +24,9 @@
       <div id="grpc-request-metadata">
         <table class="grpc-request-table" id="grpc-request-metadata-form">
             <tr><th></th><th class="name">Name</th><th class="value">Value</th></tr>
+            {{- range $k, $v := index $.RequestMetadata .}}
+            <tr><td><input class="name" size="24" value={{$k}}></td><td><input class="value" size="40" value={{$v}}></td><tr>
+            {{- end}}
             <tr><td><button id="grpc-request-metadata-add-row" class="add">+</button></td><td colspan="2"><span class="add-row-label">Add item</span></td></tr>
         </table>
       </div>

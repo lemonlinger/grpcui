@@ -36,7 +36,13 @@ const csrfHeaderName = "x-grpcui-csrf-token"
 // The returned handler expects to serve resources from "/". If it will instead
 // be handling a sub-path (e.g. handling "/rpc-ui/") then use http.StripPrefix.
 func Handler(ch grpcdynamic.Channel, target string, methods []*desc.MethodDescriptor, files []*desc.FileDescriptor) http.Handler {
-	webFormHTML := grpcui.WebFormContents("invoke", "metadata", methods)
+	reqmeta := map[string]string{
+		"X-B3-TraceId": "54321",
+		"X-TT-Sampled": "1.0",
+		"X-TT-Debug":   "true",
+		"X-TT-STrace":  "grpcui",
+	}
+	webFormHTML := grpcui.WebFormContents("invoke", "metadata", reqmeta, methods)
 	webFormJS := grpcui.WebFormScript()
 	webFormCSS := grpcui.WebFormSampleCSS()
 
