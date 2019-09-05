@@ -64,6 +64,7 @@ var (
 	protoFiles  multiString
 	importPaths multiString
 	reflHeaders multiString
+	reqHeaders  multiString
 	authority   = flags.String("authority", "", prettify(`
 		Value of :authority pseudo-header to be use with underlying HTTP/2
 		requests. It defaults to the given address.`))
@@ -105,6 +106,10 @@ func init() {
 		than one via multiple flags. These headers will only be used during
 		reflection requests and will be excluded when invoking the requested RPC
 		method.`))
+	flags.Var(&reqHeaders, "request-header", prettify(`
+		Additional grpc request headers in 'name: value' format. May specify more
+		than one via multiple flags. These headers will be showed on the webform 
+		page and used when invoking the requested RPC method.`))
 	flags.Var(&protoset, "protoset", prettify(`
 		The name of a file containing an encoded FileDescriptorSet. This file's
 		contents will be used to determine the RPC schema instead of querying
@@ -332,7 +337,8 @@ func main() {
 		refClient = nil
 	}
 
-	handler := standalone.Handler(cc, target, methods, allFiles)
+	reqmeta := convertSliceValueToSingleString(grpcurl.MetadataFromHeaders(reqHeaders))
+	handler := standalone.Handler(cc, target, methods, reqmeta, allFiles)
 	if *maxTime > 0 {
 		timeout := time.Duration(*maxTime * float64(time.Second))
 		// enforce the timeout by wrapping the handler and inserting a
@@ -651,4 +657,16 @@ func logErrorf(format string, args ...interface{}) {
 func logInfof(format string, args ...interface{}) {
 	prefix := "INFO: " + time.Now().Format("2006/01/02 15:04:05") + " "
 	log.Printf(prefix+format, args...)
+}
+
+func convertSliceValueToSingleString(m map[string][]string) map[string]string {
+	res := map[string]string{}
+	for k, v := range m {
+		if len(v) > 0 {
+			res[k] = v[0]
+		} else {
+			res[k] = ""
+		}
+	}
+	return res
 }

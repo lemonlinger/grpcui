@@ -35,13 +35,7 @@ const csrfHeaderName = "x-grpcui-csrf-token"
 //
 // The returned handler expects to serve resources from "/". If it will instead
 // be handling a sub-path (e.g. handling "/rpc-ui/") then use http.StripPrefix.
-func Handler(ch grpcdynamic.Channel, target string, methods []*desc.MethodDescriptor, files []*desc.FileDescriptor) http.Handler {
-	reqmeta := map[string]string{
-		"X-B3-TraceId": "54321",
-		"X-TT-Sampled": "1.0",
-		"X-TT-Debug":   "true",
-		"X-TT-STrace":  "grpcui",
-	}
+func Handler(ch grpcdynamic.Channel, target string, methods []*desc.MethodDescriptor, reqmeta map[string]string, files []*desc.FileDescriptor) http.Handler {
 	webFormHTML := grpcui.WebFormContents("invoke", "metadata", reqmeta, methods)
 	webFormJS := grpcui.WebFormScript()
 	webFormCSS := grpcui.WebFormSampleCSS()
@@ -175,7 +169,7 @@ func computeETag(contents []byte) string {
 // and methods supported by the server, and constructs a handler to serve the UI.
 //
 // The handler has the same properties as the one returned by Handler.
-func HandlerViaReflection(ctx context.Context, cc *grpc.ClientConn, target string) (http.Handler, error) {
+func HandlerViaReflection(ctx context.Context, cc *grpc.ClientConn, target string, reqmeta map[string]string) (http.Handler, error) {
 	m, err := grpcui.AllMethodsViaReflection(ctx, cc)
 	if err != nil {
 		return nil, err
@@ -186,5 +180,5 @@ func HandlerViaReflection(ctx context.Context, cc *grpc.ClientConn, target strin
 		return nil, err
 	}
 
-	return Handler(cc, target, m, f), nil
+	return Handler(cc, target, m, reqmeta, f), nil
 }
