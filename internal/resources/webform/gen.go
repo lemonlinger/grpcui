@@ -1,6 +1,6 @@
 package webform
 
-//go get github.com/kevinburke/go-bindata
+//go:generate go get github.com/kevinburke/go-bindata
 //go:generate go-bindata -pkg=webform webform-sample.css webform-template.html webform.js
 
 // WebFormScript --

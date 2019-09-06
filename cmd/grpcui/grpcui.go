@@ -338,7 +338,11 @@ func main() {
 	}
 
 	reqmeta := convertSliceValueToSingleString(grpcurl.MetadataFromHeaders(reqHeaders))
-	handler := standalone.Handler(cc, target, methods, reqmeta, allFiles)
+	conf := standalone.Config{
+		RequestMetadata: reqmeta,
+		HiddenHead:      false,
+	}
+	handler := standalone.Handler(conf, cc, target, methods, allFiles)
 	if *maxTime > 0 {
 		timeout := time.Duration(*maxTime * float64(time.Second))
 		// enforce the timeout by wrapping the handler and inserting a

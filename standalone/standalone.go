@@ -22,6 +22,12 @@ import (
 const csrfCookieName = "_grpcui_csrf_token"
 const csrfHeaderName = "x-grpcui-csrf-token"
 
+// Config handler config
+type Config struct {
+	RequestMetadata map[string]string
+	HiddenHead      bool
+}
+
 // Handler returns an HTTP handler that provides a fully-functional gRPC web
 // UI, including the main index (with the HTML form), all needed CSS and JS
 // assets, and the handlers that provide schema metadata and perform RPC
@@ -35,8 +41,8 @@ const csrfHeaderName = "x-grpcui-csrf-token"
 //
 // The returned handler expects to serve resources from "/". If it will instead
 // be handling a sub-path (e.g. handling "/rpc-ui/") then use http.StripPrefix.
-func Handler(ch grpcdynamic.Channel, target string, methods []*desc.MethodDescriptor, reqmeta map[string]string, files []*desc.FileDescriptor) http.Handler {
-	webFormHTML := grpcui.WebFormContents("invoke", "metadata", reqmeta, methods)
+func Handler(c Config, ch grpcdynamic.Channel, target string, methods []*desc.MethodDescriptor, files []*desc.FileDescriptor) http.Handler {
+	webFormHTML := grpcui.WebFormContents("invoke", "metadata", c.RequestMetadata, methods)
 	webFormJS := grpcui.WebFormScript()
 	webFormCSS := grpcui.WebFormSampleCSS()
 
@@ -65,7 +71,7 @@ func Handler(ch grpcdynamic.Channel, target string, methods []*desc.MethodDescri
 		ETag:        computeETag(webFormCSS),
 	})
 
-	indexContents := getIndexContents(target, webFormHTML)
+	indexContents := getIndexContents(target, webFormHTML, c.HiddenHead)
 	indexResource := &resource{
 		Data: func() []byte {
 			return indexContents
@@ -118,13 +124,15 @@ func Handler(ch grpcdynamic.Channel, target string, methods []*desc.MethodDescri
 
 var indexTemplate = template.Must(template.New("index.html").Parse(string(standalone.GetIndexTemplate())))
 
-func getIndexContents(target string, webForm []byte) []byte {
+func getIndexContents(target string, webForm []byte, hiddenHead bool) []byte {
 	data := struct {
 		Target          string
 		WebFormContents string
+		HiddenHead      bool
 	}{
 		Target:          target,
 		WebFormContents: string(webForm),
+		HiddenHead:      hiddenHead,
 	}
 	var indexBuf bytes.Buffer
 	if err := indexTemplate.Execute(&indexBuf, data); err != nil {
@@ -169,7 +177,7 @@ func computeETag(contents []byte) string {
 // and methods supported by the server, and constructs a handler to serve the UI.
 //
 // The handler has the same properties as the one returned by Handler.
-func HandlerViaReflection(ctx context.Context, cc *grpc.ClientConn, target string, reqmeta map[string]string) (http.Handler, error) {
+func HandlerViaReflection(ctx context.Context, c Config, cc *grpc.ClientConn, target string) (http.Handler, error) {
 	m, err := grpcui.AllMethodsViaReflection(ctx, cc)
 	if err != nil {
 		return nil, err
@@ -180,5 +188,5 @@ func HandlerViaReflection(ctx context.Context, cc *grpc.ClientConn, target strin
 		return nil, err
 	}
 
-	return Handler(cc, target, m, reqmeta, f), nil
+	return Handler(c, cc, target, m, f), nil
 }
